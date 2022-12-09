@@ -9,8 +9,8 @@ import java.util.ServiceLoader;
 public class JavaSpiTest {
 
     public static void main(String[] args) {
-        ServiceLoader<Search> s = ServiceLoader.load(Search.class);
-        Iterator<Search> iterator = s.iterator();
+        ServiceLoader<Search> serviceLoader = ServiceLoader.load(Search.class);
+        Iterator<Search> iterator = serviceLoader.iterator();
         while (iterator.hasNext()) {
             Search search =  iterator.next();
             search.searchDoc("hello world");
