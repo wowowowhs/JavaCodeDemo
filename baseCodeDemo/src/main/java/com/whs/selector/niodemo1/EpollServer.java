@@ -1,4 +1,4 @@
-package com.whs.selector.demo1;
+package com.whs.selector.niodemo1;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -43,8 +43,7 @@ public class EpollServer {
                         SocketChannel socketChannel = ssc.accept();
                         socketChannel.configureBlocking(false);
                         socketChannel.register(selector, SelectionKey.OP_READ);
-                    }
-                    else if (key.isReadable()) {
+                    } else if (key.isReadable()) {
                         SocketChannel socketChannel = (SocketChannel) key.channel();
                         readBuff.clear();
                         socketChannel.read(readBuff);
@@ -52,8 +51,7 @@ public class EpollServer {
                         readBuff.flip();
                         System.out.println("received : " + new String(readBuff.array()));
                         key.interestOps(SelectionKey.OP_WRITE);
-                    }
-                    else if (key.isWritable()) {
+                    } else if (key.isWritable()) {
                         writeBuff.rewind();
                         SocketChannel socketChannel = (SocketChannel) key.channel();
                         socketChannel.write(writeBuff);

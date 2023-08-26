@@ -14,7 +14,7 @@ public class IfTest {
             //说明a是负数，则取a的相反数
             a = -a;
         }
-        System.out.println("a的绝对值："+a);
+        System.out.println("a的绝对值：" + a);
     }
 
 }

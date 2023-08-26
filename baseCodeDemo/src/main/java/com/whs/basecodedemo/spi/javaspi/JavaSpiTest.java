@@ -12,7 +12,7 @@ public class JavaSpiTest {
         ServiceLoader<Search> serviceLoader = ServiceLoader.load(Search.class);
         Iterator<Search> iterator = serviceLoader.iterator();
         while (iterator.hasNext()) {
-            Search search =  iterator.next();
+            Search search = iterator.next();
             search.searchDoc("hello world");
         }
     }

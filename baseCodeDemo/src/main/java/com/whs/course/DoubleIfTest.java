@@ -4,9 +4,9 @@ import java.util.Scanner;
 
 public class DoubleIfTest {
     public static void main(String[] args) {
-        int a,b;
+        int a, b;
         Scanner sc = new Scanner(System.in);
-        while(true) {
+        while (true) {
             //获取a、b的输入
             a = sc.nextInt();
             b = sc.nextInt();

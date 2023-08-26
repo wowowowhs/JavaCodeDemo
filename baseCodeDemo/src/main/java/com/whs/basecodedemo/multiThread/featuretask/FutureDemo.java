@@ -28,9 +28,9 @@ public class FutureDemo {
         });
 
         try {
-            Integer result = (Integer)future.get();
+            Integer result = (Integer) future.get();
             System.out.println(result);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
