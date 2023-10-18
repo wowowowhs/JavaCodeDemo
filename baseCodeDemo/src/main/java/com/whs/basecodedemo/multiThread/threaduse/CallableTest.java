@@ -11,8 +11,10 @@ import java.util.concurrent.*;
 
 public class CallableTest {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static final int DATA_SIZE = 1000000;
+    public static final int BATCH_SIZE = 10000;
 
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         MyCallable mc = new MyCallable();
         FutureTask<Integer> ft = new FutureTask<>(mc);
@@ -21,8 +23,9 @@ public class CallableTest {
         System.out.println("myCallable result : " + ft.get());
 
         //单线程
-        List<Integer> ids = new ArrayList<>(100);
-        for (int i = 0; i < 100; i++) {
+        System.out.println("====================单线程=======================");
+        List<Integer> ids = new ArrayList<>(DATA_SIZE);
+        for (int i = 0; i < DATA_SIZE; i++) {
             ids.add(i);
         }
         ReturnObjectCallable returnObjectCallableSingle = new ReturnObjectCallable(ids);
@@ -38,8 +41,8 @@ public class CallableTest {
                 break;
             }
         }
-        Thread.sleep(2000);
-        //多线程：并发执行
+        System.out.println("====================多线程方法1=======================");
+        //多线程：并发执行（写法1）
         //创建固定大小的线程池
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
         int fromIndex = 0;
@@ -60,20 +63,68 @@ public class CallableTest {
             Future<List<CallableObj>> future = threadPool.submit(returnObjectCallable);
             resultFutures.add(future);
         }
-        //打印结果
-//        List<CallableObj> result = new ArrayList<>();
-//        for (Future<List<CallableObj>> resultFuture : resultFutures) {
-//            result.addAll(resultFuture.get());
-//        }
-//        System.out.println("result : " + result);
         threadPool.shutdown();
         while (true) {
             if (threadPool.isTerminated()) {
                 long endTime = System.currentTimeMillis();
-                System.out.println("多线程并发执行时间：" + (endTime - startTime));
+                System.out.println("（方法1）多线程并发执行时间：" + (endTime - startTime));
+                List<CallableObj> callableObjList = new ArrayList<>();
+                for (Future<List<CallableObj>> resultFuture : resultFutures) {
+                    callableObjList.addAll(resultFuture.get());
+                }
+//                System.out.println("（方法1）多线程并发执行结果 : " + callableObjList);
                 break;
             }
         }
+
+        /*====================================================*/
+        System.out.println("====================多线程方法2=======================");
+        Thread.sleep(5000);
+        //多线程：并发执行（写法2）
+        ExecutorService threadPoolWay2 = Executors.newFixedThreadPool(10);
+        fromIndex = 0;
+        toIndex = 0;
+        total = ids.size();
+        //保存线程执行结果
+        List<Future<List<CallableObj>>> resultFutures4Way2 = new ArrayList<>();
+
+        while (toIndex < total) {
+            toIndex = Math.min(fromIndex + BATCH_SIZE, total);
+            List<Integer> idsTemp = ids.subList(fromIndex, toIndex);
+            Future<List<CallableObj>> threadRes = threadPoolWay2.submit(new Callable<List<CallableObj>>() {
+                @Override
+                public List<CallableObj> call() throws Exception {
+                    String nameFormat = "ojb-%d";
+                    List<CallableObj> res = new ArrayList<>(idsTemp.size());
+                    for (Integer id : idsTemp) {
+                        String name = String.format(nameFormat, id);
+                        CallableObj callableObj = CallableObj.builder()
+                                .id(id)
+                                .name(name)
+                                .build();
+                        res.add(callableObj);
+                    }
+                    return res;
+                }
+            });
+            resultFutures4Way2.add(threadRes);
+            fromIndex = toIndex;
+        }
+        long startTimeWay2 = System.currentTimeMillis();
+        threadPoolWay2.shutdown();
+        while (true) {
+            if (threadPoolWay2.isTerminated()) {
+                long endTimeWay2 = System.currentTimeMillis();
+                System.out.println("（方法2）多线程并发执行时间：" + (endTimeWay2 - startTimeWay2));
+                List<CallableObj> callableObjList = new ArrayList<>();
+                for (Future<List<CallableObj>> resultFuture : resultFutures4Way2) {
+                    callableObjList.addAll(resultFuture.get());
+                }
+//                System.out.println("（方法2）多线程并发执行结果 : " + callableObjList);
+                break;
+            }
+        }
+
     }
 
 }
@@ -103,7 +154,7 @@ class ReturnObjectCallable implements Callable<List<CallableObj>> {
         for (Integer id : ids) {
             String name = String.format(nameFormat, id);
 //            System.out.println("ThreadName:" + Thread.currentThread().getName() + " name:" + name);
-            Thread.sleep(50);
+//            Thread.sleep(10);
             CallableObj callableObj = CallableObj.builder()
                     .id(id)
                     .name(name)
